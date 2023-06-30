@@ -1,0 +1,2 @@
+﻿# ignore all files in any directory named 'reports' but keep the directory
+reports/*

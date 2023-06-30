@@ -1,0 +1,23 @@
+[Setup]
+Lang=default
+Dir=C:\Program Files\Git
+Group=Git
+NoIcons=0
+SetupType=default
+Components=icons,icons\desktop,icons\quicklaunch,ext,ext\shellhere,ext\guihere,gitlfs,assoc,assoc_sh,windowsterminal
+Tasks=desktopicon,fileassoc
+EditorOption=CustomEditor
+CustomEditorPath=C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.3.3\bin\idea64.exe
+DefaultBranchOption=main
+PathOption=Cmd
+SSHOption=OpenSSH
+TortoiseOption=false
+CURLOption=OpenSSL
+CRLFOption=CRLFAlways
+BashTerminalOption=MinTTY
+GitPullBehaviorOption=Merge
+UseCredentialManager=Enabled
+PerformanceTweaksFSCache=Enabled
+EnableSymlinks=Disabled
+EnablePseudoConsoleSupport=Disabled
+EnableFSMonitor=Disabled
