@@ -4,6 +4,9 @@
 # Created: 6/25/2023
 # Version: 1.0
 
+# Call from commandline:
+# .\ComputerReport.ps1
+
 # Generic variables
 $delimiter = '|'
 $currentDate = Get-Date -Format 'yyyy-MM-dd'
@@ -40,7 +43,15 @@ $DeviceInfo
 
 #Get List of Installed Apps
 
-$excludedPublishers = @('NVIDIA*','Conexant*','Microsoft*')
+$excludedPublishers = @() # create empty array
+$prolificPublishers = @('NVIDIA*','Conexant*','Microsoft*')
+foreach ($pub in $prolificPublishers) {
+    $confirmation = Read-Host "Ignore Publisher: '$pub' ? [y/n] "
+    if ($confirmation -eq 'y') {
+        $excludedPublishers += $pub
+    }
+}
+
 $filteredInstalledApps = Get-ItemProperty hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* |
     Where-Object { 
         $pub = $_.Publisher
