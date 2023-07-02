@@ -25,6 +25,9 @@
 .EXAMPLE
     The example calls the script in the local file, and saves csv files to child directory "reports\"
     PS C:\> .\ComputerReport.ps1
+    PowerShell.exe -File "ComputerReport.ps1" -ExecutionPolicy Bypass
+    Invoke-Expression '.\ComputerReport.ps1 -Exclude $false'
+    ** Test these on machine with ExecutionPolicy=Restricted and clean up command
 
 .NOTES
     Author: Coach Jenkins
