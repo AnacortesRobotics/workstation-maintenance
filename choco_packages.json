@@ -1,0 +1,48 @@
+{
+  "packages": [
+    {
+      "package": {
+        "id": "git.install",
+        "installArguments": "/LOADINF=\"C:\\Users\\FTCAdmin\\Desktop\\FIRST Workstation Installs\\git_install.inf\"",
+        "allowMultipleVersions": "false",
+        "ignoreDependencies": "false"
+      }
+    },
+    {
+      "package": {
+        "id": "notepadplusplus",
+        "allowMultipleVersions": "false",
+        "ignoreDependencies": "false"
+      }
+    },
+    {
+      "package": {
+        "id": "googlechrome",
+        "allowMultipleVersions": "false",
+        "ignoreDependencies": "false"
+      }
+    },
+    {
+      "package": {
+        "id": "freecad",
+        "packageParameters": "/InstallDir=\"C:\\Program Files\\FreeCAD\"",
+        "allowMultipleVersions": "false",
+        "ignoreDependencies": "false"
+      }
+    },
+    {
+      "package": {
+        "id": "inkscape",
+        "allowMultipleVersions": "false",
+        "ignoreDependencies": "false"
+      }
+    },
+    {
+      "package": {
+        "id": "corretto11jdk",
+        "allowMultipleVersions": "false",
+        "ignoreDependencies": "false"
+      }
+    }
+  ]
+}
