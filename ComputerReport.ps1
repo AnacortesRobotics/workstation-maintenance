@@ -64,13 +64,14 @@ function Get-DeviceInfo {
     # Get Data - Device info, installed apps info
     $SysInfo = Get-ComputerInfo
     $OSInfo = Get-CimInstance Win32_OperatingSystem
-    $RamInfo = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb
-    $DiskInfo = (Get-WmiObject -Class Win32_LogicalDisk | ? {$_. DriveType -eq 3})
+    $RamInfo = (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum
+    [Array]$DiskInfo = @(Get-WmiObject -Class Win32_LogicalDisk | ? {$_. DriveType -eq 3}) #| Select -Property deviceid, size, freespace )
+
     $Properties = [ordered]@{
         Device           = $SysInfo.CsDNSHostName
         Model            = $SysInfo.CsModel
         Processor        = $SysInfo.CsProcessors.Name
-        InstalledRam     = $RamInfo.ToString('#.# GB')
+        InstalledRam     = ($RamInfo/1GB).ToString('#.# GB')
         SystemType       = $SysInfo.CsSystemType
         Num_Processors   = $SysInfo.CsNumberOfLogicalProcessors
         Edition          = $SysInfo.OSName
@@ -79,14 +80,27 @@ function Get-DeviceInfo {
         Build            = $SysInfo.OSBuildNumber
         HotFixes         = $SysInfo.OsHotFixes
         BiosStatus       = $SysInfo.BiosStatus
-        TotalDiskSpace   = ($DiskInfo.Size /1GB).ToString('#.# GB')
-        FreeDiskSpace    = ($DiskInfo.FreeSpace /1GB).ToString('#.# GB')
         ReportDate       = $currentDate
     }
 
     $DeviceInfo = [PsCustomObject]$Properties
 
+    $i = 0
+
+    ForEach($device in $DiskInfo) {
+        $devStr = $device.DeviceID -replace "\W"
+        New-Variable -Name "TotalDiskSpace$devStr" -Value ([Math]::Round(($device.Size/1GB),2)).ToString('#.# GB')
+        New-Variable -Name "FreeDiskSpace$devStr" -Value ([Math]::Round(($device.FreeSpace/1GB),2)).ToString('#.# GB')
+        Write-Host $i "TotalDiskSpace$devStr : " (Get-Variable -Name "TotalDiskSpace$devStr").Value "FreeDiskSpace$devStr : "  (Get-Variable -Name "FreeDiskSpace$devStr").Value
+
+        $DeviceInfo | Add-Member -Name "TotalDiskSpace$devStr" -Type NoteProperty -Value (Get-Variable -Name "TotalDiskSpace$devStr").Value
+        $DeviceInfo | Add-Member -Name "FreeDiskSpace$devStr" -Type NoteProperty -Value (Get-Variable -Name "FreeDiskSpace$devStr").Value
+
+        $i++
+    }
+
     return $DeviceInfo
+
 }
 
 function Write-DataCsv {
@@ -181,6 +195,7 @@ $UserData = $OutputInfo = Get-LocalUser | Sort-Object -Property Name |
         Name,PrincipalSource,Enabled,Description,LastLogon,PasswordRequired,PasswordLastSet,UserMayChangePassword,PasswordExpires,AccountExpires
 
 Write-DataCsv "$($currentPath)\$($DeviceInfo.Device)-Report-$($currentDate)" "Device" $Delimiter $DeviceInfo
+Write-DataCsv "$($currentPath)\$($DeviceInfo.Device)-Report-$($currentDate)" "InstalledApps" $Delimiter $InstalledAppsData
 Write-DataCsv "$($currentPath)\$($DeviceInfo.Device)-Report-$($currentDate)" "InstalledApps" $Delimiter $InstalledAppsData
 Write-DataCsv "$($currentPath)\$($DeviceInfo.Device)-Report-$($currentDate)" "Users" $Delimiter $UserData
 
