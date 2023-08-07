@@ -31,13 +31,16 @@
 
 .NOTES
     Author: Coach Jenkins
-    Last Edit: 07-02-2023
+    Last Edit: 08-07-2023
     Version 1.0/06-25-2023 - initial release, capable of collecting device info and installed apps
     Version 1.1/07-02-2023
       * Add output of all users on workstation
       * Cleanup ComputerReport.ps1 file (breaking up code into functions) in order to read more easily
       * Add documentation comment blocks to functions and program
       * Add device name and current date to every row in every csv file so the data will merge more easily
+    Version 1.2/08-07-2023
+      * Loop through and report on all installed drives for free and total disk space. It was causing
+      *      an error when more than one drive existed.
 #>
 
 function Get-DeviceInfo {
