@@ -60,10 +60,10 @@ function Get-DeviceInfo {
     .EXAMPLE
         $customObj = Get-DeviceInfo
     #>
-    param(
-        [Parameter()]
-        [DateTime] $today
-    )
+    #param(
+    #    [Parameter()]
+    #    [DateTime] $today
+    #)
     # Get Data - Device info, installed apps info
     $SysInfo = Get-ComputerInfo
     $OSInfo = Get-CimInstance Win32_OperatingSystem
@@ -106,6 +106,53 @@ function Get-DeviceInfo {
 
 }
 
+function Get-InstalledApps {
+    <#
+    .SYNOPSIS
+        Get list of installed 32 bit and 64 apps into a custom object.
+
+    .DESCRIPTION
+        Retrieves data all installed apps for saving to file.
+
+    .INPUTS
+        Array of names of excludedPublishers.
+
+    .OUTPUTS
+        PSCustomObject containing fields of installed apps data.
+
+    .EXAMPLE
+        $customObj = Get-InstalledApps
+    #>
+    param(
+       [Parameter()]
+       [String[]] $excludedPublishers
+    )
+    $pathAllUser = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+    $pathAllUser32 = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+
+    $ResultsArray = Get-ItemProperty -Path $pathAllUser, $pathAllUser32 |
+        Where-Object {
+            $exclude = $false
+            foreach ($excludedPublisher in $excludedPublishers) {
+                if ($_.Publisher -like $excludedPublisher) {
+                    $exclude = $true
+                    break
+                }
+            }
+            (-not $exclude) -and ($_.DisplayName -ne $null)
+        }
+
+
+    foreach ($Result in $ResultsArray) {
+
+        $Result | Add-Member -MemberType NoteProperty -Name "Host" -Value $env:COMPUTERNAME
+        $Result | Add-Member -MemberType NoteProperty -Name "DateScanned" -Value $DateScanned
+    }
+
+    return $ResultsArray | Select-Object Host, DateScanned, Publisher, DisplayName, DisplayVersion, InstallDate,
+    InstallSource, InstallLocation, PSChildName, HelpLink
+}
+
 function Write-DataCsv {
     <#
     .SYNOPSIS
@@ -145,6 +192,19 @@ function Write-DataCsv {
         Out-File -FilePath $OutputFile -Append -Encoding utf8
 }
 
+function Analyze( $p, $f) {
+    Get-ItemProperty $p |foreach {
+       if (($_.DisplayName) -or ($_.version)) {
+            [PSCustomObject]@{
+                    From = $f;
+                    Name = $_.DisplayName;
+                    Version = $_.DisplayVersion;
+                    Install = $_.InstallDate
+             }
+       }
+    }
+}
+
 ## Main
 Write-Host ""
 Write-Host ""
@@ -174,24 +234,11 @@ if ($Exclude) {
     }
 }
 
-$filteredInstalledApps = Get-ItemProperty hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* |
-    Where-Object { 
-        $pub = $_.Publisher
-        $exclude = $false
-        foreach ($excludedPublisher in $excludedPublishers) {
-            if ($pub -like $excludedPublisher) {
-                $exclude = $true
-                break
-            }
-        }
-        -not $exclude
-    }
-
-$InstalledAppsData = $filteredInstalledApps | Sort-Object -Property Publisher |
+$InstalledAppsData = Get-InstalledApps $excludedPublishers | Sort-Object -Property Publisher |
     Select-Object @{name="Device"; expression={ $DeviceInfo.Device }},
         @{name="ReportDate"; expression={ $currentDate }},
         Publisher,DisplayName,DisplayVersion,InstallDate
-     #| Format-Table
+
 $UserData = $OutputInfo = Get-LocalUser | Sort-Object -Property Name |
     Select-Object @{name="Device"; expression={ $DeviceInfo.Device }},
         @{name="ReportDate"; expression={ $currentDate }},
