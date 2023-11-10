@@ -2,3 +2,5 @@
 reports/*
 !reports/
 
+# ignore the assets folder and files in it - use assets to store chocolately packages, and executable
+/assets/
