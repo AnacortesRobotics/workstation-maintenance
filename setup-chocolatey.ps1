@@ -19,4 +19,25 @@ if (Get-Command $Executable -ErrorAction SilentlyContinue)
 }
 else {
     Write-Host "Unable to find $($Executable) in your PATH. Installing ..."
+    $InstallFile = "..\chocolatey-2.2.2.0.msi"
+    $DataStamp = get-date -Format yyyyMMddTHHmmss
+    $logFile = '{0}-{1}.log' -f $Executable,$DataStamp
+    $MSIArguments = @(
+        "/i"
+        ('"{0}"' -f $InstallFile)
+        "/norestart"
+        "/L*v"
+        $logFile
+    )
+#         $MSIArguments = @(
+#         "/i"
+#         ('"{0}"' -f $Executable)
+#         "/qn"
+#         "/norestart"
+#         "/L*v"
+#         $logFile
+#     )
+    $installed = Start-Process "msiexec.exe" -ArgumentList $MSIArguments -Wait -NoNewWindow
+    Write-Host $installed
+    Write-Host "restart machine to get it to recognize choco commands"
 }
