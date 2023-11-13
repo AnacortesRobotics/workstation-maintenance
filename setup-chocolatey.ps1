@@ -29,12 +29,10 @@ if (! $elevated) {
 }
 if (Get-Command $Executable -ErrorAction SilentlyContinue)
 {
-    $CurrentVersion = [System.Version](Start-Process "$($Executable)" -ArgumentList "--version" -Wait -NoNewWindow)
-    Write-Host $CurrentVersion
+    $CurrentVersion = & Invoke-Expression "$($Executable) --version"
+    Write-Host "CurrentVersion=$($CurrentVersion), MinimumVersion=$($MinimumVersion)"
 
-    $RequiredVersion = [System.Version]$MinimumVersion
-
-    If ($CurrentVersion -lt $RequiredVersion)
+    If ([System.Version]$CurrentVersion -lt [System.Version]$MinimumVersion)
     {
         Write-Host "$($Executable) version $($CurrentVersion) does not meet requirements. Upgrading ..."
         runMSI
@@ -53,4 +51,6 @@ else {
 
 # Add local source pointing to assets directory of local nupkg files.
 choco source add --name="local" --source="assets\" --priority=1
+# Add community url with less priority to force local test first which wasn't happening when this was left as default
+choco source add --name="community_url" --source="https://community.chocolatey.org/api/v2/" --priority=2
 
