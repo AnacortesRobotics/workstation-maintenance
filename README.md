@@ -9,5 +9,10 @@ The powershell script ***ComputerReport.ps1*** can be run from the command line 
 It collects information about the workstation include name, about info, user accounts, and installed applications.
 It takes several optional parameters, see the file comments for more information.
 
+The powershell script ***setup-chocolatey.ps1*** installs and/or upgrades chocolatey. It needs to be run from PS command line in Administrator mode using
+```
+PS> powershell -ExecutionPolicy ByPass -File .\setup_chocolatey.ps1
+```
+
 The powershell script ***choco_install.ps1*** can be run from the command line on any Windows workstation.
 It installs or upgrades applications stored in packages.config.
